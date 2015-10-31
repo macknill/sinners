@@ -3,34 +3,46 @@
 
 import socket
 import json
-
+import threading
+import time
+import socket_to_web
 
 def log(text):
 	print text
 
 try:
 	file_stat = open('status.json','r')
+	file_cmd = open('cmd.json','r')
 except:
-	log("No file status.json. Script is close")
+	log("No files json. Script is close")
 	raise SystemExit(1)
-status_json = file_stat.read()
 
 try:
-	sock = socket.socket()
-	sock.bind(('127.0.0.1', 9090))
-	sock.listen(1)
+	status_json = file_stat.read()
+	cmd_json = file_cmd.read()
+except:
+	log("Read files json error. Script is close")
+	raise SystemExit(1)
+
+try:
+	status = json.loads(status_json)
+	cmd = json.loads(cmd_json)
+except:
+	log("Error decode json files. Script is close")
+	raise SystemExit(1)
+
+
+web = socket_to_web.LinkToWeb(status, cmd)
+try:
+	
+	t1 = threading.Thread(target = web.start)	
+	log("Socket Threading start")
+	t1.start()
 	while True:
-		#status = json.loads(standart_json)
-		log("Wait to connect")
-		conn, addr = sock.accept()
-		data = conn.recv(1024)
-		print data
-		print 'connected:', addr
+		time.sleep(1)	
+except:
+	web.stop()
 
-		conn.send(status_json)
-		conn.close()	
-		log("Connect close")
 
-		
-except RuntimeError, KeyboardInterrupt:
-	conn.close()
+
+
