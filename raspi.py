@@ -8,20 +8,20 @@ except RuntimeError:
 import time
 
 
-class RPiO:
-	def read(self, inputs):
+class RPi:	
+	def __init__(self, status_class):
+		self.status = status_class
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setwarnings(False)
 		log("Init Rsapberry Pi inputs")
-		for i in range(1,26):
+		for i in range(1,27):
 			GPIO.setup(i, GPIO.IN)
-			inputs[i-1] = GPIO.input(i)
-		log("Start read inputs state")
-		while True:
-			try:
-				for i in range(1,26):
-					inputs[i-1] = GPIO.input(i)
-			except IOError:
-				 log("File error")
-			time.sleep(0.2)
+			self.status["rpi"][i-1] = GPIO.input(i)
+		log("Raspberry Pi2 inputs init")
+	def read(self):
+		try:
+			for i in range(1,27):
+				self.status["rpi"][i-1] = GPIO.input(i)
+		except IOError:
+			 log("RPi inputs read error")
 

@@ -6,6 +6,7 @@ import json
 import threading
 import time
 import socket_to_web
+import raspi
 
 def log(text):
 	print text
@@ -33,12 +34,14 @@ except:
 
 
 web = socket_to_web.LinkToWeb(status, cmd)
+inputs = raspi.RPi(status)
 try:
 	
 	t1 = threading.Thread(target = web.start)	
 	log("Socket Threading start")
 	t1.start()
 	while True:
+		inputs.read()
 		time.sleep(1)	
 except:
 	web.stop()

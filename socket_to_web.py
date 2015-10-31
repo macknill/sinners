@@ -24,8 +24,11 @@ class LinkToWeb:
 				log("Wait to connect")
 				self.conn, addr = self.sock.accept()
 				data = self.conn.recv(1024)
-				print data
-				print 'connected:', addr
+				try:
+					cmd = json.loads(data)
+				except: 
+					log("error to decode JSON cmd")
+				log ('connected:' + str(addr))
 				js_data = json.dumps(self.status)
 				self.conn.send(js_data)
 				self.conn.close()	

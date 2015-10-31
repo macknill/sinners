@@ -9,7 +9,6 @@ import re
 import shutil
 import json
 
-
 def log(txt):
 	print txt
 
@@ -41,13 +40,20 @@ def socket_quest(cmd1, status1):
 		st_json = json.dumps(cmd1)
 		sock.send(st_json)
 		data = sock.recv(1024)
-		status1 = json.loads(data)
+		status2 = json.loads(data)
+		for i in range(26):
+			status1['rpi'][i] = status2['rpi'][i]
+			status1['relay'][i] = status2['relay'][i]
+		status1['time'] = status2['time'] 
+		status1['arduino'] = status2['arduino'] 
+		status1['start'] = status2['start'] 
 		sock.close()
+		return 1
 	except:
 		log("No socket server to quest script")
+		return 0
 
-lol = gmtime()
-
+socket_connect = 0
 
 class HttpProcessor(BaseHTTPRequestHandler):
 	def do_GET(self):
@@ -84,7 +90,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
 			cmd["relay"][0] = 0
 			cmd["relay"][1] = 0	
   		else:					
-			socket_quest(cmd, status)	
+			socket_connect = socket_quest(cmd, status)	
 			self.wfile.write('<!DOCTYPE "html"><html><head><title>Quest Sinners</title><meta http-equiv="Refresh" content="20" />')	
 			self.wfile.write("</head><body>")
 			self.wfile.write(strftime('%d %b %Y %H:%M:%S', gmtime()))			
@@ -96,14 +102,18 @@ class HttpProcessor(BaseHTTPRequestHandler):
 				color = 'red'
 
 			ReleTable = '<form method="get" action="/start"><button type="submit">Start Quest</button><span style="background:'  + color
-			ReleTable += '">State</span> '+ status["time"] +'</form>'
-			#strftime('%d %b %Y %H:%M:%S', (gmtime() - lol))
+			ReleTable += '">  State</span> '+ status["time"] +'</form>'
 			if status["arduino"]:
 				ReleTable +='Arduino: <span style="background: green">Connect</span>'
 			else:
 				ReleTable += 'Arduino: <span style="background: red">Disconnect</span>'
 
-			ReleTable += '<TABLE BORDER="1" CELLSPACING="0"><CAPTION>Quest state</CAPTION>';	
+			if socket_connect:
+				ReleTable +='  Socket: <span style="background: green">Connect</span>'
+			else:
+				ReleTable += '   Socket: <span style="background: red">Disconnect</span>'
+
+			ReleTable += '<TABLE BORDER="1" CELLSPACING="0"><CAPTION>Quest state</CAPTION>'	
 			ReleTable += "<TR>";	
 			ReleTable += '<TH>#</TH><TH>In/Out</TH><TH>Val</TH><TH>Name</TH>'
 			ReleTable += '<TH>#</TH><TH>In/Out</TH><TH>Val</TH><TH>Name</TH>'
