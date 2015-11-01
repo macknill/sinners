@@ -1,6 +1,8 @@
 import json
 import threading
 import socket
+import time
+
 def log(text):
 	print text
 class LinkToWeb:
@@ -61,13 +63,12 @@ class LinkToWeb:
 			log('Relay_' + str(self.cmd['relay'][0]) + ' set to ' + str(status['relay'][self.cmd['relay'][0]]))
 			self.cmd_reset()	
 		if self.cmd['reset']:
-			for i in range(26):
-				status['relay'][i] = 0
-			status['start'] = 0
-			log('Cmd reset read, all are reset')
+			log('Cmd reset read')
+			status = self.reset(status)
 			self.cmd_reset()	
 		if self.cmd['start']:
 			status['start'] = 1
+			status['time'] = time.time()
 			log('Cmd Start read, quest started')
 			self.cmd_reset()	
 		return status
@@ -77,4 +78,12 @@ class LinkToWeb:
 		self.cmd['relay'][1] = 0
 		self.cmd['start'] = 0
 		self.cmd['reset'] = 0
+
+	def reset(self, status):
+		for i in range(26):
+			status['relay'][i] = 0
+		status['start'] = 0
+		status['time'] = 0.0
+		log('All are reset')
+		return status
 		

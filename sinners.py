@@ -44,6 +44,9 @@ try:
 		status = web.read(status)		#read commands for webserver
 		inputs.read()			#read raspberry pi inputs
 		output.write()			#send command to arduino on USB
+		if status['start']:
+			if time.localtime(time.time() - status['time']).tm_min > 0:
+				status = web.reset(status)			
 		#time.sleep(1)	
 except:
 	web.stop()

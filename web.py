@@ -8,6 +8,7 @@ from array import array
 import re
 import shutil
 import json
+import time
 
 def log(txt):
 	print txt
@@ -106,8 +107,13 @@ class HttpProcessor(BaseHTTPRequestHandler):
 			else:
 				color = 'red'
 
+			time_temp = "00:00"
+			if status['start'] > 0:
+				timer = time.localtime(time.time() - status['time'])
+				time_temp = time.strftime('%M:%S', timer)
+
 			ReleTable = '<form method="get" action="/start"><button type="submit">Start Quest</button><span style="background:'  + color
-			ReleTable += '">  State</span> '+ status["time"] +'</form>'
+			ReleTable += '">  State</span> '+ time_temp +'</form>'
 			if status["arduino"]:
 				ReleTable +='Arduino: <span style="background: green">Connect</span>'
 			else:
