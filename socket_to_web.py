@@ -53,10 +53,23 @@ class LinkToWeb:
 		log("LinkToWeb.Stop")
 	
 	def read(self, status):
-		commands['relay'][0] = self.cmd['relay'][0]
-		commands['relay'][1] = self.cmd['relay'][1]
-		commands['start'] = self.cmd['start']
-		commands['reset'] = self.cmd['reset']
+		if self.cmd['relay'][1]:
+			if status['relay'][self.cmd['relay'][0]]:
+				status['relay'][self.cmd['relay'][0]] = 0
+			else:				
+				status['relay'][self.cmd['relay'][0]] = 1
+			log('Relay_' + str(self.cmd['relay'][0]) + ' set to ' + str(status['relay'][self.cmd['relay'][0]]))
+			self.cmd_reset()	
+		if self.cmd['reset']:
+			for i in range(26):
+				status['relay'][i] = 0
+			status['start'] = 0
+			log('Cmd reset read, all are reset')
+			self.cmd_reset()	
+		if self.cmd['start']:
+			status['start'] = 1
+			log('Cmd Start read, quest started')
+			self.cmd_reset()	
 		return status
 
 	def cmd_reset(self):
