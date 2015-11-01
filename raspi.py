@@ -23,5 +23,5 @@ class RPi:
 			for i in range(1,27):
 				self.status["rpi"][i-1] = GPIO.input(i)
 		except IOError:
-			 log("RPi inputs read error")
+			log("RPi inputs read error")
 

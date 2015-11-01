@@ -2,37 +2,38 @@
 import minimalmodbus
 import time
 
-class arduino:
-	def modbus(self, relays, cmd):
-		while True:
-			try:
-				arduino = minimalmodbus.Instrument('/dev/ttyACM0', 1) # port name, slave address (in decimal)
-				arduino.serial.baudrate = 115200   # Baud
-				arduino.serial.bytesize = 8
-				arduino.serial.stopbits = 1
-				arduino.serial.timeout  = 0.2   # seconds
+def log(text):
+	print text
 
-				while True:
-					try:
-						array1 = arduino.read_registers(0, 25, 3) # Registernumber, number of decimals
-						array2 = arduino.read_registers(25, 25, 3) # Registernumber, number of decimals
-						for i in range(25):
-							relays[i+25] = array2[i]
-							array1[i] = relays[i] 
-						time.sleep(0.1)
-						arduino.write_registers(0, list(array1))
-						arduino.write_registers(25, list(array2))
-						time.sleep(0.2)
-						cmd[1] = True	
-					except IOError:
-						print ("Communication error. no answer")
-						cmd[1] = False	
-						time.sleep(0.5)
-					except ValueError:
-						print "ValueError: checksum"
-						cmd[1] = False			
-						time.sleep(0.5)
-			except OSError:
-				print "No arduino"
-				cmd[1] = False	
-				time.sleep(0.5)
+class arduino:
+	def __init__(self, status):
+		self.stat = status		
+		try:
+			self.arduino = minimalmodbus.Instrument('/dev/ttyACM0', 1) # port name, slave address (in decimal)
+			self.arduino.serial.baudrate = 115200   # Baud
+			self.arduino.serial.bytesize = 8
+			self.arduino.serial.stopbits = 1
+			self.arduino.serial.timeout  = 0.2   # seconds
+		except OSError:
+			log("No arduino")
+			status['arduino'] = 0	
+			time.sleep(0.5)
+	def write(self):
+		try:
+			#array1 = arduino.read_registers(0, 26, 3) # Registernumber, number of decimals
+			array = self.arduino.read_registers(26, 26, 3) # Registernumber, number of decimals
+			for i in range(26):
+				#relays[i+25] = array2[i]
+				array[i] = self.stat['relay'][i] 
+			time.sleep(0.1)
+			self.arduino.write_registers(0, list(array))
+			#arduino.write_registers(26, list(array2))
+			self.stat['arduino'] = 1	
+		except ValueError:
+			log("ValueError: checksum")
+			self.stat['arduino'] = 0	
+			time.sleep(0.5)
+		except:
+			log("Communication error. no answer")
+			self.stat['arduino'] = 0
+			time.sleep(0.5)

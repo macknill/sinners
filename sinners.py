@@ -7,6 +7,7 @@ import threading
 import time
 import socket_to_web
 import raspi
+import arduino
 
 def log(text):
 	print text
@@ -32,16 +33,24 @@ except:
 	log("Error decode json files. Script is close")
 	raise SystemExit(1)
 
-
 web = socket_to_web.LinkToWeb(status, cmd)
 inputs = raspi.RPi(status)
+output = arduino.arduino(status)
 try:
-	
 	t1 = threading.Thread(target = web.start)	
 	log("Socket Threading start")
 	t1.start()
 	while True:
+		if cmd['relay'][1] == 1:
+			cmd['relay'][1] = 0
+			log(cmd['relay'][0])
+			#if status['relay'][int(cmd['relay'][0])]:
+			#	status['relay'][int(cmd['relay'][0])] = 0
+			#else:				
+			#	status['relay'][int(cmd['relay'][0])] = 1			
 		inputs.read()
+		output.write()
+		log(str(cmd))
 		time.sleep(1)	
 except:
 	web.stop()

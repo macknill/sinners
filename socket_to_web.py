@@ -10,7 +10,8 @@ class LinkToWeb:
 		self.wait = True
 		self.sock = socket.socket()
 		self.sock.bind(('127.0.0.1', 9090))
-		try:
+		self.sock.listen(1)
+		try:			
 			self.sock.listen(1)
 			log("Socket 9090 open")
 		except:
@@ -24,8 +25,10 @@ class LinkToWeb:
 				log("Wait to connect")
 				self.conn, addr = self.sock.accept()
 				data = self.conn.recv(1024)
-				try:
-					cmd = json.loads(data)
+				try:	
+					self.cmd = json.loads(data)	
+					if self.cmd['relay'][1]:
+						self.relay = self.cmd['relay'][1]							
 				except: 
 					log("error to decode JSON cmd")
 				log ('connected:' + str(addr))
@@ -49,4 +52,5 @@ class LinkToWeb:
 			log("[Except]No conn var in def stop(self):")
 		self.sock.shutdown(socket.SHUT_RDWR)
 		log("LinkToWeb.Stop")
+
 		
