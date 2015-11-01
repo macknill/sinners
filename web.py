@@ -33,12 +33,15 @@ except:
 	log("Error decode json files. Script is close")
 	raise SystemExit(1)
 
-def socket_quest(cmd1, status1):
+def socket_quest(cmd1, status1, rw):
 	try:
 		sock = socket.socket()
 		sock.connect(('127.0.0.1', 9090))
-		st_json = json.dumps(cmd1)
-		sock.send(st_json)
+		if rw:
+			st_json = json.dumps(cmd1)
+			sock.send(st_json)
+		else:
+			sock.send("none")
 		data = sock.recv(1024)
 		status2 = json.loads(data)
 		for i in range(26):
@@ -61,6 +64,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
 		self.send_response(200)
 		self.send_header('content-type','text/html')
 		self.end_headers()
+		readwrite = True
 		if len(address) > 1:		
 			if address.find("start") == 1:	
 				log("CMD START")
@@ -76,6 +80,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
 					cmd["relay"][0] = number
 					cmd["relay"][1] = 1	
 			elif address.find("favicon.ico"):
+				readwtite = False
 				try:
 					favicon = open('sinners.png','r')
 					self.wfile.write(favicon.read())
@@ -84,13 +89,13 @@ class HttpProcessor(BaseHTTPRequestHandler):
 				
 			
 			self.wfile.write('<script language="JavaScript">window.location.href = "/"</script>')
-			socket_quest(cmd, status)			
+			socket_quest(cmd, status, readwrite)			
 			cmd["start"] = 0
 			cmd["reset"] = 0
 			cmd["relay"][0] = 0
 			cmd["relay"][1] = 0	
   		else:					
-			socket_connect = socket_quest(cmd, status)	
+			socket_connect = socket_quest(cmd, status, False)				
 			self.wfile.write('<!DOCTYPE "html"><html><head><title>Quest Sinners</title><meta http-equiv="Refresh" content="20" />')	
 			self.wfile.write("</head><body>")
 			self.wfile.write(strftime('%d %b %Y %H:%M:%S', gmtime()))			

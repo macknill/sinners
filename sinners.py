@@ -41,17 +41,17 @@ try:
 	log("Socket Threading start")
 	t1.start()
 	while True:
+		cmd = web.read(cmd)		#read commands for webserver
+		inputs.read()			#read raspberry pi inputs
+		output.write()			#send command to arduino on USB
 		if cmd['relay'][1] == 1:
-			cmd['relay'][1] = 0
-			log(cmd['relay'][0])
-			#if status['relay'][int(cmd['relay'][0])]:
-			#	status['relay'][int(cmd['relay'][0])] = 0
-			#else:				
-			#	status['relay'][int(cmd['relay'][0])] = 1			
-		inputs.read()
-		output.write()
-		log(str(cmd))
-		time.sleep(1)	
+			if status['relay'][cmd['relay'][0]]:
+				status['relay'][cmd['relay'][0]] = 0
+			else:				
+				status['relay'][cmd['relay'][0]] = 1
+			log('Relay_' + str(cmd['relay'][0]) + ' set to ' + str(status['relay'][cmd['relay'][0]]))
+			web.cmd_reset()	
+		#time.sleep(1)	
 except:
 	web.stop()
 

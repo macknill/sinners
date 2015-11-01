@@ -22,20 +22,19 @@ class LinkToWeb:
 		while self.wait:
 			try:
 				#status = json.loads(standart_json)
-				log("Wait to connect")
+				#log("Wait to connect")
 				self.conn, addr = self.sock.accept()
 				data = self.conn.recv(1024)
 				try:	
-					self.cmd = json.loads(data)	
-					if self.cmd['relay'][1]:
-						self.relay = self.cmd['relay'][1]							
+					if data != "none":
+						self.cmd = json.loads(data)							
 				except: 
 					log("error to decode JSON cmd")
 				log ('connected:' + str(addr))
 				js_data = json.dumps(self.status)
 				self.conn.send(js_data)
 				self.conn.close()	
-				log("Connect close")
+				#log("Connect close")
 			except:	
 				log("[Except] in LinkToWeb.start")
 				try:			
@@ -52,5 +51,17 @@ class LinkToWeb:
 			log("[Except]No conn var in def stop(self):")
 		self.sock.shutdown(socket.SHUT_RDWR)
 		log("LinkToWeb.Stop")
+	
+	def read(self, status):
+		commands['relay'][0] = self.cmd['relay'][0]
+		commands['relay'][1] = self.cmd['relay'][1]
+		commands['start'] = self.cmd['start']
+		commands['reset'] = self.cmd['reset']
+		return status
 
+	def cmd_reset(self):
+		self.cmd['relay'][0] = 0
+		self.cmd['relay'][1] = 0
+		self.cmd['start'] = 0
+		self.cmd['reset'] = 0
 		
